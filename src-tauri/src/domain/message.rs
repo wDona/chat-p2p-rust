@@ -1,9 +1,9 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-struct Message {
-    id: String,
-    content: String,
-    sender: String,
-    receiver: String,
+pub struct Message {
+    pub id: String,
+    pub content: String,
+    pub sender: String,
+    pub receiver: String,
 }

@@ -1,4 +1,4 @@
-struct Error {
-    code: u32,
-    message: String,
+pub struct Error {
+    pub code: u32,
+    pub message: String,
 }

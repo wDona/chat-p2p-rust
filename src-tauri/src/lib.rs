@@ -1,5 +1,8 @@
 // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
 mod interface;
+mod infrastructure;
+mod domain;
+mod application;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
