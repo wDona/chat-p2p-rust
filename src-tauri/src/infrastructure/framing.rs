@@ -1,0 +1,1 @@
+// escribir / leer bytes de un stream TCP
