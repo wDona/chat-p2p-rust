@@ -23,7 +23,7 @@
 
 .container {
   margin: 0;
-  padding-top: 10vh;
+  padding-top: 2vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -113,4 +113,39 @@ button {
   button:active {
     background-color: #0f0f0f69;
   }
+}
+
+.chat {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1em;
+  height: 60vh;
+  margin: 0 1em 1em;
+  overflow-y: auto;
+}
+
+.chat ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+}
+
+#received { text-align: left; }
+#sent { text-align: right; }
+
+#message-input {
+  flex: 1;
+  max-width: 30em;
+  margin-right: 5px;
+}
+
+#connect-form input {
+  margin-right: 5px;
+}
+
+#port-input {
+  width: 7em;
 }

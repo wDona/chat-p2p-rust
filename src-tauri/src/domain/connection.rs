@@ -1,6 +1,9 @@
-use tokio::net::TcpStream;
+use tokio::net::{TcpStream};
+use tokio::sync::mpsc::Sender;
+use crate::domain::{peer::Peer};
 
+#[derive(Debug, Clone)]
 pub struct PeerConnection {
-    pub stream: TcpStream,
-    pub peer: super::peer::Peer,
+    pub sender: Sender<String>,
+    pub peer: Peer,
 }

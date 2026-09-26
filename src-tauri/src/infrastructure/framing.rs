@@ -3,10 +3,10 @@ use tokio::io::{AsyncBufReadExt, BufReader, AsyncWriteExt};
 use tokio::net::TcpStream;
 use crate::domain::connection::PeerConnection;
 
-pub async fn write_string_to_stream(s: String, connection: &mut PeerConnection) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn write_string_to_stream(s: String, mut stream: TcpStream) -> Result<(), Box<dyn std::error::Error>> {
     let bytes: Vec<u8> = s.into_bytes();
 
-    connection.stream.write_all(&bytes).await?;
+    stream.write_all(&bytes).await?;
     Ok(())
 }
 

@@ -10,34 +10,22 @@
 
   <body>
     <main class="container">
-      <h1>Welcome to Tauri</h1>
-
-      <div class="row">
-        <a href="https://vite.dev" target="_blank">
-          <img src="/src/assets/vite.svg" class="logo vite" alt="Vite logo" />
-        </a>
-        <a href="https://tauri.app" target="_blank">
-          <img
-            src="/src/assets/tauri.svg"
-            class="logo tauri"
-            alt="Tauri logo"
-          />
-        </a>
-        <a href="https://www.typescriptlang.org/docs" target="_blank">
-          <img
-            src="/src/assets/typescript.svg"
-            class="logo typescript"
-            alt="typescript logo"
-          />
-        </a>
-      </div>
-      <p>Click on the Tauri logo to learn more about the framework</p>
-
-      <form class="row" id="greet-form">
-        <input id="greet-input" placeholder="Enter a name..." />
-        <button type="submit">Greet</button>
+      <form class="row" id="connect-form">
+        <input id="ip-input" placeholder="IP (ej. 127.0.0.1)" required autocomplete="off" />
+        <input id="port-input" type="number" min="1" max="65535" placeholder="Puerto" required />
+        <button type="submit">Conectar</button>
       </form>
-      <p id="greet-msg"></p>
+      <p id="status"></p>
+
+      <div class="chat">
+        <ul id="received"></ul>
+        <ul id="sent"></ul>
+      </div>
+
+      <form class="row" id="message-form">
+        <input id="message-input" placeholder="Escribe un mensaje..." autocomplete="off" />
+        <button type="submit">Enviar</button>
+      </form>
     </main>
   </body>
 </html>

@@ -1,30 +1,73 @@
 use core::error;
 
 use crate::domain::{peer::Peer, connection::PeerConnection};
+use crate::interface::events::{message_received, message_sent, user_connected, error_occurred};
+use tokio::sync::mpsc::{Receiver, Sender};
 use tokio::net::{TcpListener, TcpStream};
+use tokio::io::{AsyncBufReadExt, BufReader, AsyncWriteExt, AsyncReadExt};
+use crate::domain::error::Error;
 
-pub async fn listen_to_peer(peer: &Peer) -> Result<(), Box<dyn std::error::Error>> {
-    let listener = TcpListener::bind("0.0.0.0:4000").await?;
+use tauri::{EventTarget::App, Manager};
+use crate::application::state::AppState;
+use tauri::AppHandle;
+
+use crate::infrastructure::puertos::bind_libre;
+
+pub async fn accept_any_connection_loop(handle: AppHandle) -> Result<(), Box<dyn std::error::Error>> {
+    let listener = bind_libre(4000).await?;
 
     loop {
-        let (stream, addr) = listener.accept().await?;
+        let (stream, addr) = match listener.accept().await {
+            Ok(connection) => connection,
+            Err(e) => {
+                eprintln!("Error accepting connection: {}", e);
+                continue;
+            }
+        };
+
+        let peer = Peer::new(addr.ip().to_string(), addr.port());
+        user_connected(&handle, &peer.id);
+        crate::application::connect_peer::register_connection(peer, stream, handle.clone());
     }
 }
 
-pub async fn connect_to_peer(peer: &Peer) -> Result<PeerConnection, Box<dyn std::error::Error>> {
+pub async fn try_to_connect_to(peer: &Peer, handle: AppHandle) -> Result<TcpStream, Box<dyn std::error::Error>> {
     let addr = format!("{}:{}", peer.address, peer.port);
-    let stream = TcpStream::connect(addr).await?;
-
-    let connection = PeerConnection {
-        stream,
-        peer: Peer {
-            id: peer.id.clone(),
-            address: peer.address.clone(),
-            port: peer.port,
-            socket_addr: peer.socket_addr,
-        }
+    let stream = match TcpStream::connect(addr).await {
+        Ok(stream) => { user_connected(&handle, &peer.id); stream },
+        Err(_) => { error_occurred(&handle, "Error connecting to peer"); return Err("Error connecting to peer".into()); },
     };
-    Ok(connection)
+
+    Ok(stream)
+}
+
+pub fn write_and_read_stream_threads(stream: TcpStream, handle: tauri::AppHandle) -> Result<Sender<String>, Box<dyn std::error::Error>> {
+    let (stream_reader, mut stream_writer) = stream.into_split();
+    let (tx, mut rx) = tokio::sync::mpsc::channel::<String>(32);
+
+    let handle_clone = handle.clone();
+
+    tokio::spawn(async move {
+        let mut reader = BufReader::new(stream_reader).lines();
+        while let Ok(Some(line)) = reader.next_line().await {
+            println!("~ {}", line);
+            // Emit the received message
+            message_received(&handle, &line);
+        }
+    });
+
+    tokio::spawn(async move {
+        while let Some(msg) = rx.recv().await {
+            if let Err(e) = stream_writer.write_all(msg.as_bytes()).await {
+                eprintln!("Error sending message: {}", e);
+                break;
+            }
+
+            message_sent(&handle_clone, &msg);
+        }
+    });
+
+    Ok(tx)
 }
 
 /*
